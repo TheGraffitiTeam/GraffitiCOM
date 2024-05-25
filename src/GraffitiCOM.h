@@ -17,6 +17,7 @@ typedef struct __GReg{
     SoftwareSerial* softSerialPtr;
 
     void (*pingCallbackFuncPtr) (void);
+    void (*translateCallbackFuncPtr) (float x, float y);
 } GReg;
 
 
@@ -32,6 +33,7 @@ int gGetBufferLength(GReg reg);
 
 
 void gOnPing(GReg* regPtr, void (*funcPtr)(void));
+void gOnTranslate(GReg* regPtr, void (*funcPtr)(float x, float y));
 
 void gUpdate(GReg* regPtr);
 

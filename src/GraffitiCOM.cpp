@@ -34,13 +34,49 @@ void gUpdate(GReg* regPtr) {
     }
 
     // if first byte of buffer is 0x00 then call pingCallbackFunction
-    if ((regPtr->buffer.bytes)[0] == 0x00) {
-        if (regPtr->pingCallbackFuncPtr != NULL) {
-            (*(regPtr->pingCallbackFuncPtr))();
-        }
+    // if ((regPtr->buffer.bytes)[0] == 0x00) {
+    //     if (regPtr->pingCallbackFuncPtr != NULL) {
+    //         (*(regPtr->pingCallbackFuncPtr))();
+    //     }
+    // }
+
+    switch((regPtr->buffer.bytes)[0]) {
+        case 0x00:
+            if (regPtr->pingCallbackFuncPtr != NULL) {
+                (*(regPtr->pingCallbackFuncPtr))();
+            }
+            break;
+        case 0x02:
+            if (regPtr->translateCallbackFuncPtr != NULL) {
+                
+                char asciiX[8];
+                for (int i=1; i<8; i++) {
+                    asciiX[i-1] = (regPtr->buffer.bytes)[i];
+                }
+                asciiX[7] = '\0';
+
+                char asciiY[8];
+                for (int i=8; i<16; i++) {
+                    asciiY[i-8] = (regPtr->buffer.bytes)[i];
+                }
+                asciiY[7] = '\0';
+
+                float x = atof(asciiX);
+                float y = atof(asciiY);
+
+                (*(regPtr->translateCallbackFuncPtr))(x, y);
+
+            }
+            break;
     }
 }
 
+
 void gOnPing(GReg* regPtr, void (*funcPtr)(void)) {
     regPtr->pingCallbackFuncPtr = funcPtr;
+}
+
+
+void gOnTranslate(GReg* regPtr, void (*funcPtr)(float x, float y)) {
+    regPtr->translateCallbackFuncPtr = funcPtr;
 }
