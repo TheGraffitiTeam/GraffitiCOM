@@ -33,20 +33,42 @@ void gUpdate(GReg* regPtr) {
         gBufferUpdate(&(regPtr->buffer), regPtr->softSerialPtr);
     }
 
-    // if first byte of buffer is 0x00 then call pingCallbackFunction
-    // if ((regPtr->buffer.bytes)[0] == 0x00) {
-    //     if (regPtr->pingCallbackFuncPtr != NULL) {
-    //         (*(regPtr->pingCallbackFuncPtr))();
-    //     }
-    // }
-
     switch((regPtr->buffer.bytes)[0]) {
         case 0x00:
             if (regPtr->pingCallbackFuncPtr != NULL) {
                 (*(regPtr->pingCallbackFuncPtr))();
             }
             break;
+
+        case 0x01:
+            if (regPtr->setRpmXCallbackFuncPtr == NULL) break;
+            union {
+                float number;
+                char bytes[sizeof(float)];
+            } rpmX;
+
+            for (int i=0; i<4; i++) {
+                rpmX.bytes[i] = (regPtr->buffer.bytes)[i+1];
+            }
+
+            (*(regPtr->setRpmXCallbackFuncPtr))(rpmX.number);
+            break;
+
         case 0x02:
+            if (regPtr->setRpmYCallbackFuncPtr == NULL) break;
+            union {
+                float number;
+                char bytes[sizeof(float)];
+            } rpmY;
+
+            for (int i=0; i<4; i++) {
+                rpmY.bytes[i] = (regPtr->buffer.bytes)[i+1];
+            }
+
+            (*(regPtr->setRpmYCallbackFuncPtr))(rpmY.number);
+            break;
+
+        case 0x03:
             if (regPtr->translateCallbackFuncPtr != NULL) {
                 
                 char asciiX[8];
@@ -72,6 +94,8 @@ void gUpdate(GReg* regPtr) {
 }
 
 
+//calback register functions
+
 void gOnPing(GReg* regPtr, void (*funcPtr)(void)) {
     regPtr->pingCallbackFuncPtr = funcPtr;
 }
@@ -79,4 +103,14 @@ void gOnPing(GReg* regPtr, void (*funcPtr)(void)) {
 
 void gOnTranslate(GReg* regPtr, void (*funcPtr)(float x, float y)) {
     regPtr->translateCallbackFuncPtr = funcPtr;
+}
+
+
+void gOnSetRpmX(GReg* regPtr, void (*funcPtr)(float rpm)) {
+    regPtr->setRpmXCallbackFuncPtr = funcPtr;
+}
+
+
+void gOnSetRpmY(GReg* regPtr, void (*funcPtr)(float rpm)) {
+    regPtr->setRpmYCallbackFuncPtr = funcPtr;
 }

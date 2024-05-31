@@ -11,6 +11,7 @@ typedef struct __GBuffer{
 } GBuffer;
 
 
+// This is a registry type of thing kept for storing frequently used variables
 typedef struct __GReg{
     GBuffer buffer;
     HardwareSerial* hardSerialPtr;
@@ -18,6 +19,8 @@ typedef struct __GReg{
 
     void (*pingCallbackFuncPtr) (void);
     void (*translateCallbackFuncPtr) (float x, float y);
+    void (*setRpmXCallbackFuncPtr) (float steps);
+    void (*setRpmYCallbackFuncPtr) (float steps);
 } GReg;
 
 
@@ -34,6 +37,9 @@ int gGetBufferLength(GReg reg);
 
 void gOnPing(GReg* regPtr, void (*funcPtr)(void));
 void gOnTranslate(GReg* regPtr, void (*funcPtr)(float x, float y));
+
+void gOnSetRpmX(GReg* regPtr, void (*funcPtr)(float rpm));
+void gOnSetRpmY(GReg* regPtr, void (*funcPtr)(float rpm));
 
 void gUpdate(GReg* regPtr);
 
